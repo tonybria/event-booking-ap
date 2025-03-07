@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const SignUpScreen = () => {
@@ -7,9 +7,10 @@ const SignUpScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!username || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'All fields are required!');
       return;
@@ -20,14 +21,34 @@ const SignUpScreen = () => {
       return;
     }
 
-    // Simulate successful signup
-    Alert.alert('Success', 'Account created successfully!');
+    setLoading(true);
 
-    // Navigate directly to Featured screen after signup
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Featured' }],
-    });
+    try {
+      const response = await fetch(' ', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await response.json();
+      setLoading(false);
+
+      if (!response.ok) {
+        Alert.alert('Signup Failed', data.message || 'Something went wrong');
+        return;
+      }
+
+      Alert.alert('Success', 'Account created successfully!');
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Featured' }],
+      });
+
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Error', 'Something went wrong. Please try again later.');
+    }
   };
 
   return (
@@ -71,8 +92,8 @@ const SignUpScreen = () => {
         placeholderTextColor="#aaa"
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>Sign Up</Text>
+      <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign Up</Text>}
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -100,6 +121,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderWidth: 1,
     borderRadius: 5,
+    borderColor: '#ccc',
   },
   button: {
     backgroundColor: '#FF4081',
