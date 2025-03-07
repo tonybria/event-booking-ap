@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import Tabs from './components/Tabs';
-import { Featured, EventDetail } from './screens';
-import { customFonts } from './constants';
-import LoginScreen from './screens/LoginScreen';
-import SignUpScreen from './screens/SignUpScreen';
+import Tabs from './frontend/components/Tabs';
+import { Featured, EventDetail } from './frontend/screens';
+import { customFonts } from './frontend/constants';
+import LoginScreen from './frontend/screens/LoginScreen';
+import SignUpScreen from './frontend/screens/SignUpScreen';
 
 
 
