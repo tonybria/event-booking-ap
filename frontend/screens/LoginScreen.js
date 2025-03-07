@@ -7,21 +7,39 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
 
-  // Handle login
-  const handleLogin = () => {
+  // Handle login with backend integration
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Email and Password are required');
       return;
     }
 
-    // Simulate a successful login
-    Alert.alert('Login Successful');
+    try {
+      const response = await fetch('http://localhost:5000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    // Navigate directly to Featured screen after login
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Featured' }],
-    });
+      const data = await response.json();
+      
+      if (response.ok) {
+        Alert.alert('Login Successful');
+
+        // Save token if needed
+        // AsyncStorage.setItem('token', data.token);
+
+        // Navigate to the Featured screen
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Featured' }],
+        });
+      } else {
+        Alert.alert('Error', data.error);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to connect to the server');
+    }
   };
 
   return (
