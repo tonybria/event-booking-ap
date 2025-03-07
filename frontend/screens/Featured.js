@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Dimensions, Button } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for the ticket icon
 
 const { width } = Dimensions.get('window');
 
@@ -11,9 +12,26 @@ const eventData = [
 ];
 
 const Featured = ({ navigation }) => {
+  const [activeTickets, setActiveTickets] = useState([]);
+
+  const purchaseTicket = (event) => {
+    setActiveTickets([...activeTickets, event]);
+    alert(`Ticket purchased for ${event.title}`);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>🌟 Featured Events</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>🌟 Featured Events</Text>
+        <TouchableOpacity style={styles.ticketIcon} onPress={() => alert('Showing active tickets')}>
+          <Ionicons name="ios-ticket" size={32} color="#fff" />
+          {activeTickets.length > 0 && (
+            <View style={styles.ticketCount}>
+              <Text style={styles.ticketCountText}>{activeTickets.length}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={eventData}
         keyExtractor={(item) => item.id}
@@ -24,11 +42,20 @@ const Featured = ({ navigation }) => {
             <View style={styles.textContainer}>
               <Text style={styles.title}>{item.title}</Text>
               <Text style={styles.description}>{item.description}</Text>
+              <Button title="Buy Ticket" onPress={() => purchaseTicket(item)} />
             </View>
           </TouchableOpacity>
         )}
         contentContainerStyle={styles.listContent}
       />
+      {activeTickets.length > 0 && (
+        <View style={styles.ticketsContainer}>
+          <Text style={styles.ticketsHeader}>Active Tickets</Text>
+          {activeTickets.map((ticket, index) => (
+            <Text key={index} style={styles.ticketItem}>{ticket.title}</Text>
+          ))}
+        </View>
+      )}
     </View>
   );
 };
@@ -40,12 +67,36 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 10,
   },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
   header: {
     fontSize: 26,
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 15,
+  },
+  ticketIcon: {
+    position: 'relative',
+  },
+  ticketCount: {
+    position: 'absolute',
+    top: -10,
+    right: -10,
+    backgroundColor: 'red',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ticketCountText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   listContent: {
     paddingBottom: 20,
@@ -91,6 +142,23 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontSize: 14,
     marginTop: 5,
+  },
+  ticketsContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#1e1e1e',
+    borderRadius: 8,
+  },
+  ticketsHeader: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  ticketItem: {
+    color: '#aaa',
+    fontSize: 16,
+    marginVertical: 5,
   },
 });
 
