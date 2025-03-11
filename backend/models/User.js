@@ -21,27 +21,16 @@ const userSchema = new mongoose.Schema({
         enum: ['admin', 'organizer', 'attendee'], 
         default: 'attendee' 
     },
-<<<<<<< HEAD
 },  { collection: "users" } ,{ timestamps: true }
 ); // ✅ Adds createdAt & updatedAt fields
-=======
-}, { timestamps: true, collection: "users" }); 
->>>>>>> Benny
 
 // 🔹 Hash password before saving to DB
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
-<<<<<<< HEAD
     
-=======
->>>>>>> Benny
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
 });
 
-<<<<<<< HEAD
-
-=======
->>>>>>> Benny
 module.exports = mongoose.model('User', userSchema);
