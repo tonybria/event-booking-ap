@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Add this
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
 
-  // Handle login with backend integration
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Email and Password are required');
@@ -15,30 +15,33 @@ const LoginScreen = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5001/login', {
+      const response = await fetch('http://localhost:5000/api/auth/login', { // Updated URL
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
-      
-      if (response.ok) {
-        Alert.alert('Login Successful');
 
-        // Save token if needed
-        // AsyncStorage.setItem('token', data.token);
-
-        // Navigate to the Featured screen
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Featured' }],
-        });
-      } else {
-        Alert.alert('Error', data.error);
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
       }
+
+      // Save token and user data
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(data.user));
+
+      Alert.alert('Success', 'Login successful');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Featured' }],
+      });
+
     } catch (error) {
-      Alert.alert('Error', 'Failed to connect to the server');
+      Alert.alert('Error', error.message || 'Login failed. Please try again.');
     }
   };
 
