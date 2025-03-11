@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as Font from 'expo-font';
+import axios from 'axios'; // Import Axios
 import {
   StyleSheet,
   Text,
@@ -15,8 +16,6 @@ import { customFonts } from './frontend/constants';
 import LoginScreen from './frontend/screens/LoginScreen';
 import SignUpScreen from './frontend/screens/SignUpScreen';
 
-
-
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -30,17 +29,27 @@ export default function App() {
 
   useEffect(() => {
     _loadAssetsAsync();
-  });
+  }, []);
+
+  useEffect(() => {
+    
+    axios.get('https://your-backend-api.com/endpoint')
+      .then(response => {
+        console.log(response.data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
 
   return assetsLoaded ? (
     <NavigationContainer>
       <StatusBar barStyle="light-content"> </StatusBar>
-      <Stack.Navigator initialRouteName="LoginScreen" screenOptions={{ headerShown: false }}
-      >
-       <Stack.Screen name="LoginScreen" component={LoginScreen} />
-         <Stack.Screen name="SignScreen" component={SignUpScreen} />
+      <Stack.Navigator initialRouteName="LoginScreen" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="LoginScreen" component={LoginScreen} />
+        <Stack.Screen name="SignScreen" component={SignUpScreen} />
         <Stack.Screen name="Featured" component={Tabs} screenOptions={{ headerShown: false }} />
-        <Stack.Screen name="EventDetail" component={EventDetail} screenOptions={{ headerShown: false }}  />
+        <Stack.Screen name="EventDetail" component={EventDetail} screenOptions={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   ) : (
@@ -51,7 +60,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#b3e5fc',
     alignItems: 'center',
     justifyContent: 'center',
   },

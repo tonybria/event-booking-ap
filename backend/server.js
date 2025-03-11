@@ -2,48 +2,60 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
-const Event = require("./models/Event"); // ✅ Import Event model
 
-const ticketRoutes = require("./routes/ticketRoutes");
-const eventRoutes = require("./routes/eventRoutes"); // Import event routes
-const Ticket = require("./models/Ticket");
-
+// Routes
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
+const eventRoutes = require("./routes/eventRoutes");
+const ticketRoutes = require("./routes/ticketRoutes");
 
 const app = express();
-app.use(express.json());
-app.use(cors());
 
-// MongoDB Connection
+// Middleware
+app.use(express.json());
+app.use(cors({
+  origin: [
+    process.env.CLIENT_URL || "http://localhost:8081", // Expo web
+    'http://192.168.100.5:8081', // Local network IP
+    'your-production-app-url.com'
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
+// Database Connection
 mongoose.connect(process.env.MONGO_URI, {
-  dbName: "ticket_booking" 
+  dbName: "ticket_booking",
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 })
 .then(() => console.log("MongoDB Connected"))
 .catch(err => console.error("MongoDB Connection Error:", err));
 
-app.use("/api/tickets", ticketRoutes);
-app.use("/api/events", eventRoutes); // ✅ Add event routes
+// Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/tickets", ticketRoutes);
 
-const PORT = process.env.PORT || 5000;
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: err.message || "Internal Server Error"
+  });
+});
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Endpoint not found"
+  });
+});
+
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
-
-//test fetching data from database
-
-// async function fetchTickets() {
-//   const tickets = await Ticket.find();
-//   console.log(tickets);
-// }
-
-// fetchTickets();
-
-// async function fetchEvents() {
-//   const events = await Event.find();
-//   console.log(events);
-// }
-
-// fetchEvents();
 

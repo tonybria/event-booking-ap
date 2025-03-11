@@ -1,29 +1,37 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
-
+const express = require('express');
 const router = express.Router();
-router.post("/register", async (req, res) => {
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+
+// POST /api/auth/register
+router.post('/register', async (req, res) => {
+  try {
+    // Validate input
     const { username, email, password } = req.body;
-  
-    try {
-      let user = await User.findOne({ email });
-      if (user) return res.status(400).json({ error: "Email already exists" });
-  
-      // Hash password
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-  
-      // Create new user
-      user = new User({ username, email, password: hashedPassword });
-      await user.save();
-  
-      res.status(201).json({ message: "User registered successfully" });
-    } catch (error) {
-      console.error("Registration Error:", error); // ✅ Logs actual error in terminal
-      res.status(500).json({ error: "Server error" });
+    
+    // Check if user exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists' });
     }
-  });
-  
-  module.exports = router;
+
+    // Create user
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ username, email, password: hashedPassword });
+    await user.save();
+
+    // Generate JWT
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.status(201).json({ token });
+  } catch (error) {
+    res.status(500).json({ error: 'Registration failed' });
+  }
+});
+
+module.exports = router;

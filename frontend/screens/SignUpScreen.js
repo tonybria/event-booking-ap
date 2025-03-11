@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignUpScreen = () => {
   const [username, setUsername] = useState('');
@@ -11,6 +12,7 @@ const SignUpScreen = () => {
   const navigation = useNavigation();
 
   const handleSignUp = async () => {
+    // Validation checks
     if (!username || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'All fields are required!');
       return;
@@ -24,30 +26,39 @@ const SignUpScreen = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(' ', {
+      // Use your authentication endpoint
+      const response = await fetch('http//localhost:5000/api/auth/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          username, 
+          email, 
+          password 
+        }),
       });
 
       const data = await response.json();
-      setLoading(false);
 
       if (!response.ok) {
-        Alert.alert('Signup Failed', data.message || 'Something went wrong');
-        return;
+        throw new Error(data.message || 'Registration failed');
       }
 
-      Alert.alert('Success', 'Account created successfully!');
-
+      // Save the authentication token
+      await AsyncStorage.setItem('authToken', data.token);
+      
+      // Navigate to main app screen
       navigation.reset({
         index: 0,
         routes: [{ name: 'Featured' }],
       });
 
     } catch (error) {
+      Alert.alert('Error', error.message || 'Registration failed. Please try again.');
+    } finally {
       setLoading(false);
-      Alert.alert('Error', 'Something went wrong. Please try again later.');
     }
   };
 
@@ -92,8 +103,16 @@ const SignUpScreen = () => {
         placeholderTextColor="#aaa"
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign Up</Text>}
+      <TouchableOpacity 
+        style={styles.button} 
+        onPress={handleSignUp} 
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Sign Up</Text>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
@@ -103,40 +122,40 @@ const SignUpScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+// Keep your existing styles
+const styles = StyleSheet.create({ 
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 30,
+    marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
-    width: '80%',
-    padding: 10,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderRadius: 5,
+    height: 40,
     borderColor: '#ccc',
+    borderWidth: 1,
+    marginBottom: 20,
+    paddingHorizontal: 10,
   },
   button: {
-    backgroundColor: '#FF4081',
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderRadius: 25,
-    marginTop: 10,
+    backgroundColor: '#007BFF',
+    padding: 10,
+    alignItems: 'center',
+    borderRadius: 5,
   },
   buttonText: {
-    fontSize: 18,
-    color: 'white',
+    color: '#fff',
+    fontSize: 16,
   },
   linkText: {
-    color: '#0288D1',
-    marginTop: 15,
+    color: '#007BFF',
+    marginTop: 20,
+    textAlign: 'center',
   },
 });
 
