@@ -5,6 +5,8 @@ require("dotenv").config();
 const Event = require("./models/Event"); 
 
 
+
+
 const ticketRoutes = require("./routes/ticketRoutes");
 const eventRoutes = require("./routes/eventRoutes"); // Import event routes
 const Ticket = require("./models/Ticket");
@@ -33,14 +35,14 @@ app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 app.use("/api/auth", authRoutes);
 
-//test fetching data from database
+// test fetching data from database
 
-// async function fetchTickets() {
-//   const tickets = await Ticket.find();
-//   console.log(tickets);
-// }
+async function fetchTickets() {
+  const tickets = await Ticket.find();
+  console.log(tickets);
+}
 
-// fetchTickets();
+fetchTickets();
 
 // async function fetchEvents() {
 //   const events = await Event.find();

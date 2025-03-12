@@ -3,7 +3,7 @@ const { getAllTickets, purchaseTicket } = require("../controllers/ticketControll
 
 const router = express.Router();
 
-router.get("/", getAllTickets);
-router.post("/purchase", purchaseTicket);
+router.get("/", getAllTickets); // Corrected route for fetching all tickets
+router.post("/purchase", purchaseTicket); // Purchasing tickets
 
 module.exports = router;

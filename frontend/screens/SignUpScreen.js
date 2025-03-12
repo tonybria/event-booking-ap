@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { BACKEND_URL } from '@env';
+
 
 const SignUpScreen = () => {
   const [username, setUsername] = useState('');
@@ -9,7 +11,7 @@ const SignUpScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigation = useNavigation();
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!username || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'All fields are required!');
       return;
@@ -20,61 +22,35 @@ const SignUpScreen = () => {
       return;
     }
 
-    // Simulate successful signup
-    Alert.alert('Success', 'Account created successfully!');
-
-    // Navigate directly to Featured screen after signup
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Featured' }],
-    });
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password })
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert('Success', 'Account created successfully! Redirecting to login...');
+        setTimeout(() => navigation.navigate('LoginScreen'), 2000);
+      } else {
+        Alert.alert('Error', data.error || 'Registration failed.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error. Please try again.');
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Sign Up</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-        autoCapitalize="none"
-        placeholderTextColor="#aaa"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        placeholderTextColor="#aaa"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        placeholderTextColor="#aaa"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-        placeholderTextColor="#aaa"
-      />
-
+      <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} autoCapitalize="none" placeholderTextColor="#aaa" />
+      <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" placeholderTextColor="#aaa" />
+      <TextInput style={styles.input} placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry placeholderTextColor="#aaa" />
+      <TextInput style={styles.input} placeholder="Confirm Password" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry placeholderTextColor="#aaa" />
       <TouchableOpacity style={styles.button} onPress={handleSignUp}>
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
-
       <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
         <Text style={styles.linkText}>Already have an account? Login</Text>
       </TouchableOpacity>
